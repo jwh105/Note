@@ -1140,5 +1140,300 @@ public class AnnotationPointCut {
    - spring相关的
    - aop织入
    - mybatis-spring [new]
+   
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <project xmlns="http://maven.apache.org/POM/4.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+       <parent>
+           <artifactId>spring_autowired</artifactId>
+           <groupId>org.example</groupId>
+           <version>1.0-SNAPSHOT</version>
+       </parent>
+       <modelVersion>4.0.0</modelVersion>
+   
+       <artifactId>spring_mybatis</artifactId>
+   
+       <properties>
+           <maven.compiler.source>8</maven.compiler.source>
+           <maven.compiler.target>8</maven.compiler.target>
+       </properties>
+       <dependencies>
+           <dependency>
+               <groupId>org.springframework</groupId>
+               <artifactId>spring-webmvc</artifactId>
+               <version>5.2.12.RELEASE</version>
+           </dependency>
+           <dependency>
+               <groupId>org.mybatis</groupId>
+               <artifactId>mybatis</artifactId>
+               <version>3.5.6</version>
+           </dependency>
+           <!--Spring操作数据库，需要spring-jdbc-->
+           <dependency>
+               <groupId>org.springframework</groupId>
+               <artifactId>spring-jdbc</artifactId>
+               <version>5.2.12.RELEASE</version>
+           </dependency>
+           <dependency>
+               <groupId>org.mybatis</groupId>
+               <artifactId>mybatis-spring</artifactId>
+               <version>2.0.6</version>
+           </dependency>
+           <dependency>
+               <groupId>mysql</groupId>
+               <artifactId>mysql-connector-java</artifactId>
+               <version>5.1.38</version>
+           </dependency>
+           <dependency>
+               <groupId>org.aspectj</groupId>
+               <artifactId>aspectjweaver</artifactId>
+               <version>1.8.9</version>
+           </dependency>
+       </dependencies>
+   
+       <build>
+           <!--扫描xml文件-->
+           <resources>
+               <resource>
+                   <directory>src/main/java</directory>
+                   <includes>
+                       <include>**/*.xml</include>
+                   </includes>
+                   <filtering>true</filtering>
+               </resource>
+           </resources>
+       </build>
+   </project>
+   ```
+   
 2. 编写配置文件
+
 3. 测试
+
+
+
+### 12.1 回忆Mybatis
+
+1. 编写实体类
+2. 编写核心配置文件
+3. 编写接口
+4. 编写Mapper.xml
+5. 测试
+
+
+
+### 12.2 Mybatis-spring
+
+1. 编写数据源配置
+
+2. sqlSessionFactory
+
+3. sqlSessionTemplet
+
+   **spring-dao.xml(写死的，专门的Mybatis-spring的配置):**
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <beans xmlns="http://www.springframework.org/schema/beans"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+   
+       <!--  DataSource:使用Spring的数据源替换Mybatis的配置
+             这里使用Spring提供的JDBC：org.springframework.jdbc.datasource.DriverManagerDataSource-->
+       <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+           <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+           <property name="url"
+                     value="jdbc:mysql://localhost:3306/school?useSSL=false&amp;useUnicode=true&amp;characterEncoding=utf-8"/>
+           <property name="username" value="root"/>
+           <property name="password" value="123456"/>
+       </bean>
+   
+       <!--  sqlSessionFactory  -->
+       <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+           <property name="dataSource" ref="dataSource"/>
+           <!--   绑定Mybatis配置文件，即可在绑定的配置文件中进行扩展     -->
+           <property name="configLocation" value="classpath:mybatis-config.xml"/>
+           <property name="mapperLocations" value="classpath:com/csii/jwh/mapper/*.xml"/>
+       </bean>
+   
+       <!--  SqlSessionTemplate就是Mybatis中使用的SqlSession  -->
+       <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+           <constructor-arg index="0" ref="sqlSessionFactory"/>
+       </bean>
+       
+   </beans>
+   ```
+
+   **mybatis-config.xml(mybatis自己的配置，可以在spring的sqlSessionFactory中配置，配置内容不可重复):**
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8" ?>
+   <!DOCTYPE configuration
+           PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+           "http://mybatis.org/dtd/mybatis-3-config.dtd">
+   <configuration>
+       <typeAliases>
+           <package name="com.csii.jwh.bean"/>
+       </typeAliases>
+   </configuration>
+   ```
+
+4. 给接口加实现类
+
+   ```java
+   package com.csii.jwh.mapper;
+   
+   import com.csii.jwh.bean.Student;
+   import org.mybatis.spring.SqlSessionTemplate;
+   
+   import java.util.List;
+   
+   public class StudentMapperImpl implements StudentMapper {
+   
+       private SqlSessionTemplate sqlSession;
+   
+       public void setSqlSession(SqlSessionTemplate sqlSession) {
+           this.sqlSession = sqlSession;
+       }
+   
+       @Override
+       public List<Student> getStudentAll() {
+           StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+           return mapper.getStudentAll();
+       }
+   }
+   ```
+
+5. 将实现类注入到Spring中
+
+   **applicationcontext.xml(注入bean在这里注入，其他的配置用import的形式导入，让各个配置文件更专注于自己要做的事):**
+
+      ```xml
+      <?xml version="1.0" encoding="UTF-8"?>
+      <beans xmlns="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+      
+          <import resource="spring-dao.xml"/>
+      
+          <bean id="studentMapper" class="com.csii.jwh.mapper.StudentMapperImpl">
+              <property name="sqlSession" ref="sqlSession"/>
+          </bean>
+      </beans>
+      ```
+
+6. 测试
+
+   ```java
+   @Test
+   public void test01() {
+       ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("applicationcontext.xml");
+       StudentMapper mapper = context.getBean("studentMapper", StudentMapper.class);
+       List<Student> studentAll = mapper.getStudentAll();
+       for (Student student : studentAll) {
+           System.out.println(student);
+       }
+   }
+   ```
+
+目录结构：
+
+![image-20210908110729384](https://note-image-1303976927.cos.ap-shanghai.myqcloud.com/image-20210908110729384.png)
+
+#### **另一种方式：继承SqlSessionDaoSupport类**
+
+不再需要自己去配置sqlSession，而是继承SqlSessionDaoSupport类，调用其getSqlSession()方法，在Spring中注入时，需要注入sqlSessionFactory*（来自于父类SQLSessionDaoSupport）*
+
+```java
+public class StudentMapperImpl2 extends SqlSessionDaoSupport implements StudentMapper {
+    @Override
+    public List<Student> getStudentAll() {
+        return getSqlSession().getMapper(StudentMapper.class).getStudentAll();
+    }
+}
+```
+
+```xml
+<bean id="studentMapper2" class="com.csii.jwh.mapper.StudentMapperImpl2">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+</bean>
+```
+
+
+
+
+
+## 13 声明式事务
+
+### 13.1 回顾事务
+
+- 把一组业务当成一个业务来做，要么都成功，要么都失败
+- 事务在项目开发中涉及到数据的一致性问题
+- 确保完整性和一致性
+
+
+
+事务ACID原则：
+
+- 原子性
+- 一致性
+- 隔离性（多个业务可能操作共一个资源，防止数据损坏）
+- 持久性（事务一旦提交，无论系统发生什么问题，结果都不会被影响，被持久化的写到存储器中）
+
+
+
+### 13.2 Spring中的事务管理
+
+- 声明式事务（AOP）
+- 编程式事务（会改变原有代码）
+
+
+
+#### 13.2.1 注解声明式事务
+
+1. 创建事务管理器
+
+   ```xml
+   <!--配置声明式事务-->
+   <bean id="transactionManager" class="org.springframework.jdbc.support.JdbcTransactionManager">
+       <!--   注入DataSource     -->
+       <property name="dataSource" ref="dataSource"/>
+   </bean>
+   ```
+
+2. 开启事务注解
+
+   ```xml
+   <!--    开启事务注解-->
+   <tx:annotation-driven transaction-manager="transactionManager"/>
+   ```
+
+3. 需要添加事务的类或方法加上@Transactional
+
+   ```java
+   @Transactional
+   public interface StudentMapper {
+   ```
+
+
+
+> 当一个方法加入事务后，其内部的业务代码如果出现了运行时异常，则已进行的数据库操作将回滚，如：
+>
+> ```java
+> public int deleteStudent(int id) {
+>     getSqlSession().getMapper(StudentMapper.class).deleteStudent(id);
+>     int a = 10/0;
+>     return 0;
+> }
+> ```
+>
+> 尽管删除操作在异常出现前已经执行，但加入了事务，那么这个删除不作数。
+
+
+
+
+
+## 14 遇到的问题
+

@@ -343,9 +343,9 @@ interface关键字
       Integer[] integers = new Integer[1024 * 1024 * 1024];
   }
   ```
-  
+
   Exception：因编程错误或偶然外在因素导致的一般性问题，可通过代码进行处理
-  
+
   ![img](https://note-image-1303976927.cos.ap-shanghai.myqcloud.com/5982616-88bc2c5c2d6ee0b9.png)
 
 Exception 异常主要分为两类
@@ -466,7 +466,7 @@ public class MyException extends RuntimeException{
 
 ### 线程的创建和使用（8.12）
 
-#### **创建方式一：**继承Thread类
+#### 创建方式一：继承Thread类
 
 1. 创建Thread类的子类
 2. 重写Thread的run()
@@ -495,7 +495,7 @@ public class ThreadTest extends Thread {
         //必须用start()来执行，如果调用run()，只是单线程    }}
 ```
 
-#### **创建方式二：**实现Runnable接口
+#### 创建方式二：实现Runnable接口
 
 1. 创建一个实现了Runnable接口的类
 2. 实现类实现Runnable中的抽象方法: run()
@@ -540,7 +540,7 @@ class Thread3 implements Runnable{//创建实现类实现Runnable接口
 联系：public class Thread implements Runnable
 相同点：两种方式都需要重写run(),将线程要执行的逻辑声明在run()中。
 
-#### **创建方式三：**实现Callable接口（8.13）
+#### 创建方式三：实现Callable接口（8.13）
 
 与Runnable相比：
 
@@ -788,7 +788,7 @@ class Windows implements Runnable {
 
 重票![image-20210813093921976](https://note-image-1303976927.cos.ap-shanghai.myqcloud.com/image-20210813093921976.png)													错票![image-20210813093950908](https://note-image-1303976927.cos.ap-shanghai.myqcloud.com/image-20210813093950908.png)
 
-#### **方式一：同步代码块（8.13）**
+#### 方式一：同步代码块（8.13）
 
 ```java
 synchronize(同步监视器){	//需要被同步的代码}
@@ -858,7 +858,7 @@ class Windows2 extends Thread {
 
 
 
-#### **方拾二：同步方法**
+#### 方拾二：同步方法
 
 说明：
 

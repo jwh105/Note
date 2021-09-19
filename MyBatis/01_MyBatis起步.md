@@ -222,15 +222,33 @@ public interface StudentDao {
 
 
 
-
-
-
-
-
-
-
-
-
-
+> 常见错误：
+>
+> 1. `Mapped Statements collection does not contain value for com.csii.jwh.mapper.StudentMapper`
+>
+>    这个问题可能有如下原因：
+>
+>    1. namespace不对
+>
+>    2. 配置中没有引入mapper的xml文件
+>
+>    3. 逻辑代码中引用不全，要详细到方法，如：session.selectList("com.csii.jwh.mapper.StudentMapper.getStudentAll");
+>
+>    4. idea的扫描机制，导致src/main/java下的xml文件不会被扫描到(Maven静态资源过滤问题)，Maven中添加配置：
+>
+>       ```
+>       <build>
+>           <!--扫描xml文件-->
+>           <resources>
+>               <resource>
+>                   <directory>src/main/java</directory>
+>                   <includes>
+>                       <include>**/*.xml</include>
+>                   </includes>
+>                   <filtering>true</filtering>
+>               </resource>
+>           </resources>
+>       </build>
+>       ```
 
 
