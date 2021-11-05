@@ -893,7 +893,49 @@ class Windows2 extends Thread {    private static int ticket = 100;    @Override
 - 尽量避免嵌套同步
 
 ```java
-package com.csii.jwh;public class DeadLockTest {    public static void main(String[] args) {        StringBuffer s1 = new StringBuffer();        StringBuffer s2 = new StringBuffer();        new Thread() {            @Override            public void run() {                synchronized (s1) {                    try {                        sleep(100); //sleep增加线程死锁的几率                    } catch (InterruptedException e) {                        e.printStackTrace();                    }                    s1.append('1');                    s2.append('a');                    synchronized (s2) {                        s1.append('2');                        s2.append('b');                    }                }                System.out.println("s1:" + s1);                System.out.println("s2:" + s2);            }        }.start();        new Thread(new Runnable(){            @Override            public void run() {                synchronized (s2) {                    s1.append('3');                    s2.append('c');                    synchronized (s1) {                        s1.append('4');                        s2.append('d');                    }                }                System.out.println("s1:" + s1);                System.out.println("s2:" + s2);            }        }).start();    }}
+package com.csii.jwh;public class DeadLockTest {    
+    public static void main(String[] args) {        
+        StringBuffer s1 = new StringBuffer();       
+        StringBuffer s2 = new StringBuffer();  
+        
+        new Thread() {       
+            @Override          
+            public void run() {        
+                synchronized (s1) {        
+                    try {             
+                        sleep(100); //sleep增加线程死锁的几率     
+                    } catch (InterruptedException e) {      
+                        e.printStackTrace();            
+                    }        
+                    s1.append('1');  
+                    s2.append('a');   
+                    synchronized (s2) {  
+                        s1.append('2');   
+                        s2.append('b');     
+                    }       
+                }    
+                System.out.println("s1:" + s1);     
+                System.out.println("s2:" + s2); 
+            }    
+        }.start(); 
+        
+        new Thread(new Runnable(){ 
+            @Override    
+            public void run() {  
+                synchronized (s2) {    
+                    s1.append('3');     
+                    s2.append('c');        
+                    synchronized (s1) {     
+                        s1.append('4');    
+                        s2.append('d');    
+                    }           
+                }         
+                System.out.println("s1:" + s1);    
+                System.out.println("s2:" + s2);   
+            }     
+        }).start(); 
+    }
+}
 ```
 
 
@@ -1035,7 +1077,14 @@ Collection中常用方法
 1. contains(Object obj)：判断集合中是否存在obj
 
 ```java
-Collection list1 = new ArrayList();list1.add("123");list1.add(new String("Hello"));list1.add(new Person("jwh",22));System.out.println(list1.contains("123"));      //trueSystem.out.println(list1.contains(new String("Hello")));     //true，比较的是内容System.out.println(list1.contains(new Person("jwh",22)));    //false，Person中没有重写equals()
+Collection list1 = new ArrayList();
+list1.add("123");
+list1.add(new String("Hello"));
+list1.add(new Person("jwh",22));
+System.out.println(list1.contains("123"));
+//trueSystem.out.println(list1.contains(new String("Hello")));
+//true，比较的是内容System.out.println(list1.contains(new Person("jwh",22)));
+//false，Person中没有重写equals()
 ```
 
 Object中也没有重写equals方法，为重写的equals方法都是使用的==进行比较

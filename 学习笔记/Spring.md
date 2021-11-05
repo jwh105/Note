@@ -1369,6 +1369,7 @@ public class StudentMapperImpl2 extends SqlSessionDaoSupport implements StudentM
 
 ### 13.1 回顾事务
 
+- 一组操作逻辑组成的集合
 - 把一组业务当成一个业务来做，要么都成功，要么都失败
 - 事务在项目开发中涉及到数据的一致性问题
 - 确保完整性和一致性
@@ -1377,10 +1378,10 @@ public class StudentMapperImpl2 extends SqlSessionDaoSupport implements StudentM
 
 事务ACID原则：
 
-- 原子性
-- 一致性
-- 隔离性（多个业务可能操作共一个资源，防止数据损坏）
-- 持久性（事务一旦提交，无论系统发生什么问题，结果都不会被影响，被持久化的写到存储器中）
+- 原子性（事务里的操作，成功就一起成功，失败就一起失败）
+- 一致性（操作前和操作后的数据是一致的，比如A转账给B，A和B的总和是不变的）
+- 隔离性（多个业务可能操作共一个资源，A在操作时B不允许操作，防止数据损坏）
+- 持久性（事务一旦提交，无论系统发生什么问题，结果都不会被影响，被永久性地保存）
 
 
 
@@ -1430,10 +1431,4 @@ public class StudentMapperImpl2 extends SqlSessionDaoSupport implements StudentM
 > ```
 >
 > 尽管删除操作在异常出现前已经执行，但加入了事务，那么这个删除不作数。
-
-
-
-
-
-## 14 遇到的问题
 
